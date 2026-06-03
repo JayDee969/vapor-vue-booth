@@ -236,7 +236,7 @@ export function PhotoBooth() {
           ) : (
             <PhotoFrame frame={frame}>
               <video
-                ref={videoRef}
+                ref={setVideoRef}
                 playsInline
                 muted
                 className="h-full w-full object-cover [transform:scaleX(-1)]"
