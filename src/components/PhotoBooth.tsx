@@ -26,7 +26,8 @@ const STRIP_FG: Record<FrameId, string> = {
 };
 
 export function PhotoBooth() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [filter, setFilter] = useState<FilterId>("none");
   const [frame, setFrame] = useState<FrameId>("polaroid");
   const [shotCount, setShotCount] = useState<ShotCount>(1);
@@ -40,41 +41,72 @@ export function PhotoBooth() {
 
   const filterCss = FILTERS.find((f) => f.id === filter)?.css ?? "none";
 
+  // Callback ref re-attaches the existing MediaStream when the <video> element
+  // is remounted (e.g. when switching frames swaps the wrapper DOM).
+  const setVideoRef = (el: HTMLVideoElement | null) => {
+    videoRef.current = el;
+    if (el && streamRef.current && el.srcObject !== streamRef.current) {
+      el.srcObject = streamRef.current;
+      el.play().catch(() => {});
+    }
+  };
+
   useEffect(() => {
-    let stream: MediaStream | null = null;
+    let cancelled = false;
     (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } },
           audio: false,
         });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play();
-          setReady(true);
         }
+        setReady(true);
       } catch (e) {
         console.error(e);
         setError("We couldn't access your camera. Check browser permissions and try again.");
       }
     })();
     return () => {
-      stream?.getTracks().forEach((t) => t.stop());
+      cancelled = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
     };
   }, []);
 
+  // Capture a center-cropped 4:3 frame so the saved image matches what the
+  // user sees inside the (4:3) frame preview — no stretching.
   function captureFrame(): HTMLCanvasElement {
     const v = videoRef.current!;
-    const w = v.videoWidth;
-    const h = v.videoHeight;
+    const vw = v.videoWidth;
+    const vh = v.videoHeight;
+    const targetRatio = 4 / 3;
+    const srcRatio = vw / vh;
+    let sx = 0, sy = 0, sw = vw, sh = vh;
+    if (srcRatio > targetRatio) {
+      sw = vh * targetRatio;
+      sx = (vw - sw) / 2;
+    } else if (srcRatio < targetRatio) {
+      sh = vw / targetRatio;
+      sy = (vh - sh) / 2;
+    }
+    const outW = 1280;
+    const outH = 960;
     const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
+    canvas.width = outW;
+    canvas.height = outH;
     const ctx = canvas.getContext("2d")!;
-    ctx.translate(w, 0);
+    ctx.translate(outW, 0);
     ctx.scale(-1, 1);
     ctx.filter = filterCss;
-    ctx.drawImage(v, 0, 0, w, h);
+    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
     return canvas;
   }
 
