@@ -142,8 +142,15 @@ export function PhotoBooth() {
       const row = Math.floor(i / cols);
       const x = pad + col * (cellW + gap);
       const y = pad + row * (cellH + gap);
-      ctx.drawImage(c, x, y, cellW, cellH);
+      // Fit the captured frame into its cell preserving aspect ratio (no stretch).
+      const scale = Math.min(cellW / c.width, cellH / c.height);
+      const dw = c.width * scale;
+      const dh = c.height * scale;
+      const dx = x + (cellW - dw) / 2;
+      const dy = y + (cellH - dh) / 2;
+      ctx.drawImage(c, dx, dy, dw, dh);
     });
+
 
     // Footer label
     ctx.fillStyle = STRIP_FG[frame];
