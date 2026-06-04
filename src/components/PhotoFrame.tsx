@@ -32,6 +32,32 @@ export function PhotoFrame({ frame, children }: { frame: FrameId; children: Reac
       </div>
     );
   }
+  if (frame === "film35") {
+    return (
+      <div
+        className="p-6 shadow-[var(--shadow-soft)]"
+        style={{
+          background:
+            "repeating-linear-gradient(180deg,#f4ecdc 0 3px,#ebe1cc 3px 4px)",
+        }}
+      >
+        <div className="bg-black p-3">
+          <div className="flex justify-between px-1 pb-1 font-mono text-[8px] tracking-widest text-white/70">
+            <span>▸ 25A</span>
+            <span>TX 5063</span>
+          </div>
+          <div className="relative aspect-[4/3] overflow-hidden bg-black ring-1 ring-white/10">
+            {children}
+          </div>
+          <div className="flex justify-between px-1 pt-1 font-mono text-[8px] tracking-widest text-white/70">
+            <span>▸ 26</span>
+            <span>TX 5063</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (frame === "neon") {
     return (
       <div
