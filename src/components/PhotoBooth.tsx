@@ -122,7 +122,85 @@ export function PhotoBooth() {
     setTimeout(() => setFlash(false), 500);
   }
 
+  function composeFilm35(frames: HTMLCanvasElement[]): string {
+    // Vintage 35mm contact-strip look: cream paper, black film body with
+    // monospace side labels, photos stacked vertically in a single column.
+    const cellW = 560;
+    const cellH = 420;
+    const gap = 10;
+    const filmPadX = 48;
+    const filmPadY = 36;
+    const paperPadX = 70;
+    const paperPadY = 70;
+    const filmW = cellW + filmPadX * 2;
+    const filmH = filmPadY * 2 + cellH * frames.length + gap * (frames.length - 1);
+    const width = filmW + paperPadX * 2;
+    const height = filmH + paperPadY * 2;
+
+    const out = document.createElement("canvas");
+    out.width = width;
+    out.height = height;
+    const ctx = out.getContext("2d")!;
+
+    // Cream paper background with subtle horizontal grain
+    ctx.fillStyle = "#f4ecdc";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "rgba(180,160,120,0.08)";
+    for (let y = 0; y < height; y += 4) ctx.fillRect(0, y, width, 1);
+
+    // Black film body
+    const fx = paperPadX;
+    const fy = paperPadY;
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(fx, fy, filmW, filmH);
+
+    // Photos (contain-fit, no stretch)
+    frames.forEach((c, i) => {
+      const y = fy + filmPadY + i * (cellH + gap);
+      const x = fx + filmPadX;
+      const scale = Math.min(cellW / c.width, cellH / c.height);
+      const dw = c.width * scale;
+      const dh = c.height * scale;
+      const dx = x + (cellW - dw) / 2;
+      const dy = y + (cellH - dh) / 2;
+      ctx.drawImage(c, dx, dy, dw, dh);
+    });
+
+    // Side labels — rotated monospace text down both edges of the film
+    ctx.fillStyle = "rgba(245,240,225,0.75)";
+    ctx.font = "16px 'Courier New', ui-monospace, monospace";
+    const labels = ["TX 5063", "▸ 25A", "26", "TX 5063", "▸ 26A", "27"];
+    frames.forEach((_, i) => {
+      const y = fy + filmPadY + i * (cellH + gap) + cellH / 2;
+      // left edge
+      ctx.save();
+      ctx.translate(fx + 22, y);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.fillText(labels[i % labels.length], 0, 0);
+      ctx.restore();
+      // right edge
+      ctx.save();
+      ctx.translate(fx + filmW - 22, y);
+      ctx.rotate(Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.fillText(labels[(i + 2) % labels.length], 0, 0);
+      ctx.restore();
+    });
+
+    // Footer caption on the paper
+    ctx.fillStyle = "#6b4a22";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "italic 22px 'Fraunces', Georgia, serif";
+    ctx.fillText(`pose ♡ ${new Date().toLocaleDateString()}`, width / 2, height - paperPadY / 2);
+
+    return out.toDataURL("image/jpeg", 0.92);
+  }
+
   function composeStrip(frames: HTMLCanvasElement[]): string {
+    if (frame === "film35") return composeFilm35(frames);
+
     const cols = frames.length >= 4 ? 2 : 1;
     const rows = Math.ceil(frames.length / cols);
     const cellW = 640;
