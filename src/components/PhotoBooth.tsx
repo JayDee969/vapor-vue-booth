@@ -11,6 +11,8 @@ const STRIP_BG: Record<FrameId, string> = {
   none: "#ffffff",
   polaroid: "#ffffff",
   filmstrip: "#171717",
+  film35: "#f4ecdc",
+
   neon: "#0a0a0a",
   scrapbook: "#fdf6e3",
   cute: "#fbeaf2",
