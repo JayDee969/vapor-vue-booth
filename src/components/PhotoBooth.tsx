@@ -235,7 +235,7 @@ export function PhotoBooth() {
               />
             ) : (
               <PhotoFrame frame={frame}>
-                <img src={result} alt="Your shot" className="h-full w-full object-cover" />
+                <img src={result} alt="Your shot" className="absolute inset-0 h-full w-full object-contain" />
               </PhotoFrame>
             )
           ) : (
@@ -244,9 +244,10 @@ export function PhotoBooth() {
                 ref={setVideoRef}
                 playsInline
                 muted
-                className="h-full w-full object-cover [transform:scaleX(-1)]"
+                className="absolute inset-0 h-full w-full object-contain [transform:scaleX(-1)]"
                 style={{ filter: filterCss }}
               />
+
               {!ready && !error && (
                 <div className="absolute inset-0 grid place-items-center bg-muted/60 text-sm text-muted-foreground">
                   Warming up the lens…
