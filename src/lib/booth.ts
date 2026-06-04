@@ -27,6 +27,8 @@ export const FRAMES: { id: FrameId; label: string }[] = [
   { id: "none", label: "None" },
   { id: "polaroid", label: "Polaroid" },
   { id: "filmstrip", label: "Film Strip" },
+  { id: "film35", label: "Film 35" },
+
   { id: "neon", label: "Neon Glow" },
   { id: "scrapbook", label: "Scrapbook" },
   { id: "cute", label: "Cute Border" },
