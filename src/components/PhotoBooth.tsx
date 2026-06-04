@@ -26,6 +26,8 @@ const STRIP_FG: Record<FrameId, string> = {
   none: "#3a2a45",
   polaroid: "#3a2a45",
   filmstrip: "#f5f5f5",
+  film35: "#6b4a22",
+
   neon: "#ff6ad5",
   scrapbook: "#7a5a3a",
   cute: "#c4537a",
