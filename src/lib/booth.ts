@@ -3,6 +3,7 @@ export type FrameId =
   | "none"
   | "polaroid"
   | "filmstrip"
+  | "film35"
   | "neon"
   | "scrapbook"
   | "cute"
@@ -10,6 +11,7 @@ export type FrameId =
   | "vintage"
   | "minimalist"
   | "kawaii";
+
 
 export const FILTERS: { id: FilterId; label: string; css: string }[] = [
   { id: "none", label: "Original", css: "none" },
@@ -25,6 +27,8 @@ export const FRAMES: { id: FrameId; label: string }[] = [
   { id: "none", label: "None" },
   { id: "polaroid", label: "Polaroid" },
   { id: "filmstrip", label: "Film Strip" },
+  { id: "film35", label: "Film 35" },
+
   { id: "neon", label: "Neon Glow" },
   { id: "scrapbook", label: "Scrapbook" },
   { id: "cute", label: "Cute Border" },
