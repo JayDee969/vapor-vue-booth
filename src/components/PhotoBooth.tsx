@@ -90,24 +90,12 @@ export function PhotoBooth() {
     };
   }, []);
 
-  // Capture a center-cropped 4:3 frame so the saved image matches what the
-  // user sees inside the (4:3) frame preview — no stretching.
+  // Capture the full video frame at its native resolution so the saved photo
+  // keeps the camera's original aspect ratio — no cropping, no stretching.
   function captureFrame(): HTMLCanvasElement {
     const v = videoRef.current!;
-    const vw = v.videoWidth;
-    const vh = v.videoHeight;
-    const targetRatio = 4 / 3;
-    const srcRatio = vw / vh;
-    let sx = 0, sy = 0, sw = vw, sh = vh;
-    if (srcRatio > targetRatio) {
-      sw = vh * targetRatio;
-      sx = (vw - sw) / 2;
-    } else if (srcRatio < targetRatio) {
-      sh = vw / targetRatio;
-      sy = (vh - sh) / 2;
-    }
-    const outW = 1280;
-    const outH = 960;
+    const outW = v.videoWidth;
+    const outH = v.videoHeight;
     const canvas = document.createElement("canvas");
     canvas.width = outW;
     canvas.height = outH;
@@ -115,9 +103,10 @@ export function PhotoBooth() {
     ctx.translate(outW, 0);
     ctx.scale(-1, 1);
     ctx.filter = filterCss;
-    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
+    ctx.drawImage(v, 0, 0, outW, outH);
     return canvas;
   }
+
 
   async function runCountdown(seconds = 3) {
     for (let i = seconds; i >= 1; i--) {
