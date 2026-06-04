@@ -14,6 +14,10 @@ const STRIP_BG: Record<FrameId, string> = {
   neon: "#0a0a0a",
   scrapbook: "#fdf6e3",
   cute: "#fbeaf2",
+  modern: "#0a0a0a",
+  vintage: "#efe2c4",
+  minimalist: "#ffffff",
+  kawaii: "#ffe4f1",
 };
 
 const STRIP_FG: Record<FrameId, string> = {
@@ -23,7 +27,12 @@ const STRIP_FG: Record<FrameId, string> = {
   neon: "#ff6ad5",
   scrapbook: "#7a5a3a",
   cute: "#c4537a",
+  modern: "#f5f5f5",
+  vintage: "#6b4a22",
+  minimalist: "#3a2a45",
+  kawaii: "#c4537a",
 };
+
 
 export function PhotoBooth() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
