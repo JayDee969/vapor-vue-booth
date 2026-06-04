@@ -1,5 +1,15 @@
 export type FilterId = "none" | "vintage" | "bw" | "glow" | "pastel" | "retro" | "blur";
-export type FrameId = "none" | "polaroid" | "filmstrip" | "neon" | "scrapbook" | "cute";
+export type FrameId =
+  | "none"
+  | "polaroid"
+  | "filmstrip"
+  | "neon"
+  | "scrapbook"
+  | "cute"
+  | "modern"
+  | "vintage"
+  | "minimalist"
+  | "kawaii";
 
 export const FILTERS: { id: FilterId; label: string; css: string }[] = [
   { id: "none", label: "Original", css: "none" },
@@ -18,6 +28,10 @@ export const FRAMES: { id: FrameId; label: string }[] = [
   { id: "neon", label: "Neon Glow" },
   { id: "scrapbook", label: "Scrapbook" },
   { id: "cute", label: "Cute Border" },
+  { id: "modern", label: "Modern" },
+  { id: "vintage", label: "Vintage" },
+  { id: "minimalist", label: "Minimalist" },
+  { id: "kawaii", label: "Kawaii" },
 ];
 
 const KEY = "pose.gallery.v1";
