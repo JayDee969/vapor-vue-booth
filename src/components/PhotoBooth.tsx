@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 const SHOT_COUNTS = [1, 2, 3, 4, 6] as const;
 type ShotCount = (typeof SHOT_COUNTS)[number];
+const TIMER_OPTIONS = [0, 3, 5, 10] as const;
+type TimerSeconds = (typeof TIMER_OPTIONS)[number];
 
 const STRIP_BG: Record<FrameId, string> = {
   none: "#ffffff",
