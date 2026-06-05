@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Download, Share2, Camera, RotateCcw, Sparkles, Grid2x2, ChevronLeft, ChevronRight, Timer } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Download, Share2, Camera, RotateCcw, Sparkles, Grid2x2, ChevronLeft, ChevronRight } from "lucide-react";
 import { FILTERS, FRAMES, type FilterId, type FrameId, saveShot } from "@/lib/booth";
 import { PhotoFrame } from "./PhotoFrame";
 import { toast } from "sonner";
