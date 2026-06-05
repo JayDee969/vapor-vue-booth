@@ -615,7 +615,7 @@ function PillCarousel({
   onSelect,
   activeClass,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
   items: { id: string; label: string }[];
   activeId: string;
