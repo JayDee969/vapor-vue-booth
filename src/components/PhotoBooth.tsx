@@ -252,12 +252,21 @@ export function PhotoBooth() {
     const frames: HTMLCanvasElement[] = [];
 
     if (shotCount === 1) {
-      await runCountdown(3);
+      if (timerSeconds > 0) await runCountdown(timerSeconds);
+      else {
+        setFlash(true);
+        setTimeout(() => setFlash(false), 500);
+      }
       frames.push(captureFrame());
     } else {
       for (let i = 0; i < shotCount; i++) {
         setProgress({ current: i + 1, total: shotCount });
-        await runCountdown(i === 0 ? 3 : 2);
+        if (timerSeconds > 0) await runCountdown(timerSeconds);
+        else {
+          setFlash(true);
+          await new Promise((r) => setTimeout(r, 200));
+          setFlash(false);
+        }
         frames.push(captureFrame());
         if (i < shotCount - 1) {
           await new Promise((r) => setTimeout(r, 350));
@@ -266,16 +275,15 @@ export function PhotoBooth() {
       setProgress(null);
     }
 
-    const dataUrl = shotCount === 1 ? frames[0].toDataURL("image/jpeg", 0.92) : composeStrip(frames);
+    // Always bake the chosen frame into the saved/downloaded image.
+    const dataUrl = composeStrip(frames);
     setResult(dataUrl);
-    setIsStrip(shotCount > 1);
     saveShot({ id: crypto.randomUUID(), dataUrl, createdAt: Date.now(), filter, frame });
     toast.success(shotCount > 1 ? `${shotCount}-shot strip saved ✨` : "Saved to your gallery ✨");
   }
 
   function reset() {
     setResult(null);
-    setIsStrip(false);
   }
 
   function download() {
@@ -304,24 +312,19 @@ export function PhotoBooth() {
   }
 
   const busy = countdown !== null || progress !== null;
+  const isStrip = shotCount > 1;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       {/* Stage */}
       <div className="flex flex-col items-center">
-        <div className={`relative w-full ${isStrip && result ? "max-w-[420px]" : "max-w-[640px]"}`}>
+        <div className={`relative w-full ${isStrip && result ? "max-w-[460px]" : "max-w-[640px]"}`}>
           {result ? (
-            isStrip ? (
-              <img
-                src={result}
-                alt="Your photo strip"
-                className="w-full rounded-3xl shadow-[var(--shadow-soft)]"
-              />
-            ) : (
-              <PhotoFrame frame={frame}>
-                <img src={result} alt="Your shot" className="absolute inset-0 h-full w-full object-contain" />
-              </PhotoFrame>
-            )
+            <img
+              src={result}
+              alt="Your shot"
+              className="w-full rounded-2xl shadow-[var(--shadow-soft)]"
+            />
           ) : (
             <PhotoFrame frame={frame}>
               <video
