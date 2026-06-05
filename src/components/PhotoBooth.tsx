@@ -46,8 +46,8 @@ export function PhotoBooth() {
   const [filter, setFilter] = useState<FilterId>("none");
   const [frame, setFrame] = useState<FrameId>("polaroid");
   const [shotCount, setShotCount] = useState<ShotCount>(1);
+  const [timerSeconds, setTimerSeconds] = useState<TimerSeconds>(3);
   const [result, setResult] = useState<string | null>(null);
-  const [isStrip, setIsStrip] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
