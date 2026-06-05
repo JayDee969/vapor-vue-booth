@@ -207,42 +207,154 @@ export function PhotoBooth() {
     const rows = Math.ceil(frames.length / cols);
     const cellW = 640;
     const cellH = 480;
-    const gap = 16;
-    const pad = 28;
-    const footer = 80;
-    const width = pad * 2 + cellW * cols + gap * (cols - 1);
-    const height = pad * 2 + cellH * rows + gap * (rows - 1) + footer;
+    const gap = 20;
+    const pad = 44;
+    const footer = 90;
+    const innerW = cellW * cols + gap * (cols - 1);
+    const innerH = cellH * rows + gap * (rows - 1);
+    const width = pad * 2 + innerW;
+    const height = pad * 2 + innerH + footer;
 
     const out = document.createElement("canvas");
     out.width = width;
     out.height = height;
     const ctx = out.getContext("2d")!;
 
-    ctx.fillStyle = STRIP_BG[frame];
+    // --- Outer background per frame ---
+    const bg = STRIP_BG[frame];
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
 
+    if (frame === "vintage") {
+      // Diagonal cream stripes
+      ctx.save();
+      ctx.strokeStyle = "#e8d8b3";
+      ctx.lineWidth = 6;
+      for (let d = -height; d < width + height; d += 12) {
+        ctx.beginPath();
+        ctx.moveTo(d, 0);
+        ctx.lineTo(d + height, height);
+        ctx.stroke();
+      }
+      ctx.restore();
+      // Inner cream panel
+      ctx.fillStyle = "#fbf2dc";
+      ctx.fillRect(pad - 14, pad - 14, innerW + 28, innerH + 28);
+      ctx.strokeStyle = "rgba(184,153,104,0.4)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(pad - 14, pad - 14, innerW + 28, innerH + 28);
+    } else if (frame === "neon") {
+      // Neon gradient border
+      const grad = ctx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, "#ff6ad5");
+      grad.addColorStop(0.5, "#8c52ff");
+      grad.addColorStop(1, "#26d0ce");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#0a0a0a";
+      ctx.fillRect(20, 20, width - 40, height - 40);
+    } else if (frame === "kawaii") {
+      const grad = ctx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, "#ffe4f1");
+      grad.addColorStop(0.5, "#fff1c1");
+      grad.addColorStop(1, "#d8f1ff");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+    } else if (frame === "cute") {
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
+      grad.addColorStop(0, "#fbeaf2");
+      grad.addColorStop(1, "#e8d8f5");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(pad - 12, pad - 12, innerW + 24, innerH + 24);
+    } else if (frame === "filmstrip") {
+      // Sprocket holes top and bottom
+      ctx.fillStyle = "#3a3a3a";
+      const holeW = 22;
+      const holeH = 14;
+      const holeGap = 18;
+      const holes = Math.floor(width / (holeW + holeGap));
+      const startX = (width - (holes * (holeW + holeGap) - holeGap)) / 2;
+      for (let i = 0; i < holes; i++) {
+        const x = startX + i * (holeW + holeGap);
+        ctx.fillRect(x, 10, holeW, holeH);
+        ctx.fillRect(x, height - 24, holeW, holeH);
+      }
+    } else if (frame === "scrapbook") {
+      // Tape stickers
+      ctx.save();
+      ctx.translate(pad - 8, pad - 8);
+      ctx.rotate(-0.18);
+      ctx.fillStyle = "rgba(253,224,71,0.8)";
+      ctx.fillRect(0, 0, 100, 26);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(width - pad - 80, height - pad - 30);
+      ctx.rotate(0.15);
+      ctx.fillStyle = "rgba(251,182,206,0.8)";
+      ctx.fillRect(0, 0, 90, 24);
+      ctx.restore();
+    }
+
+    // --- Photos ---
     frames.forEach((c, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = pad + col * (cellW + gap);
       const y = pad + row * (cellH + gap);
-      // Fit the captured frame into its cell preserving aspect ratio (no stretch).
       const scale = Math.min(cellW / c.width, cellH / c.height);
       const dw = c.width * scale;
       const dh = c.height * scale;
       const dx = x + (cellW - dw) / 2;
       const dy = y + (cellH - dh) / 2;
+
+      // Per-photo decoration
+      if (frame === "polaroid") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x - 12, y - 12, cellW + 24, cellH + 60);
+      } else if (frame === "minimalist") {
+        ctx.fillStyle = "#f5f5f5";
+        ctx.fillRect(x - 6, y - 6, cellW + 12, cellH + 12);
+      } else if (frame === "modern") {
+        ctx.fillStyle = "#0a0a0a";
+        ctx.fillRect(x - 10, y - 10, cellW + 20, cellH + 20);
+      } else if (frame === "scrapbook") {
+        ctx.strokeStyle = "rgba(0,0,0,0.25)";
+        ctx.setLineDash([8, 6]);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 6, y - 6, cellW + 12, cellH + 12);
+        ctx.setLineDash([]);
+      } else if (frame === "kawaii") {
+        ctx.strokeStyle = "#fbcfe8";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(x - 4, y - 4, cellW + 8, cellH + 8);
+      }
+
       ctx.drawImage(c, dx, dy, dw, dh);
     });
-
 
     // Footer label
     ctx.fillStyle = STRIP_FG[frame];
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "italic 36px 'Fraunces', Georgia, serif";
-    const label = `pose ♡ ${new Date().toLocaleDateString()}`;
-    ctx.fillText(label, width / 2, height - footer / 2);
+    if (frame === "vintage") {
+      ctx.font = "italic 32px 'Fraunces', Georgia, serif";
+      ctx.fillText(`est. mcmlxxiv · a fond memory`, width / 2, height - footer / 2);
+    } else if (frame === "modern" || frame === "minimalist") {
+      ctx.font = "600 22px 'Inter', sans-serif";
+      const txt = frame === "modern" ? "POSE  ///  STUDIO" : `POSE  ·  ${new Date().getFullYear()}`;
+      ctx.fillText(txt, width / 2, height - footer / 2);
+    } else if (frame === "kawaii") {
+      ctx.font = "italic 30px 'Fraunces', Georgia, serif";
+      ctx.fillText("♡ so cute · so you ♡", width / 2, height - footer / 2);
+    } else if (frame === "cute") {
+      ctx.font = "600 22px 'Inter', sans-serif";
+      ctx.fillText("♡ ⋆ ˚ POSE ˚ ⋆ ♡", width / 2, height - footer / 2);
+    } else {
+      ctx.font = "italic 34px 'Fraunces', Georgia, serif";
+      ctx.fillText(`pose ♡ ${new Date().toLocaleDateString()}`, width / 2, height - footer / 2);
+    }
 
     return out.toDataURL("image/jpeg", 0.92);
   }
