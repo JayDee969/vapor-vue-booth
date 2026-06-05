@@ -439,6 +439,34 @@ export function PhotoBooth() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Timer</h3>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {TIMER_OPTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setTimerSeconds(s)}
+                disabled={busy}
+                className={`rounded-xl py-2.5 text-sm font-semibold transition-all ${
+                  timerSeconds === s
+                    ? "bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
+                    : "bg-white/50 hover:bg-white/80"
+                }`}
+              >
+                {s === 0 ? "Off" : `${s}s`}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {timerSeconds === 0
+              ? "Instant capture, no countdown."
+              : `${timerSeconds}-second countdown before each shot.`}
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
             <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Filters</h3>
           </div>
           <div className="grid grid-cols-2 gap-2">
