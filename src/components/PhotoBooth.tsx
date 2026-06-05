@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 const SHOT_COUNTS = [1, 2, 3, 4, 6] as const;
 type ShotCount = (typeof SHOT_COUNTS)[number];
+const TIMER_OPTIONS = [0, 3, 5, 10] as const;
+type TimerSeconds = (typeof TIMER_OPTIONS)[number];
 
 const STRIP_BG: Record<FrameId, string> = {
   none: "#ffffff",
@@ -44,8 +46,8 @@ export function PhotoBooth() {
   const [filter, setFilter] = useState<FilterId>("none");
   const [frame, setFrame] = useState<FrameId>("polaroid");
   const [shotCount, setShotCount] = useState<ShotCount>(1);
+  const [timerSeconds, setTimerSeconds] = useState<TimerSeconds>(3);
   const [result, setResult] = useState<string | null>(null);
-  const [isStrip, setIsStrip] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
@@ -250,12 +252,21 @@ export function PhotoBooth() {
     const frames: HTMLCanvasElement[] = [];
 
     if (shotCount === 1) {
-      await runCountdown(3);
+      if (timerSeconds > 0) await runCountdown(timerSeconds);
+      else {
+        setFlash(true);
+        setTimeout(() => setFlash(false), 500);
+      }
       frames.push(captureFrame());
     } else {
       for (let i = 0; i < shotCount; i++) {
         setProgress({ current: i + 1, total: shotCount });
-        await runCountdown(i === 0 ? 3 : 2);
+        if (timerSeconds > 0) await runCountdown(timerSeconds);
+        else {
+          setFlash(true);
+          await new Promise((r) => setTimeout(r, 200));
+          setFlash(false);
+        }
         frames.push(captureFrame());
         if (i < shotCount - 1) {
           await new Promise((r) => setTimeout(r, 350));
@@ -264,16 +275,15 @@ export function PhotoBooth() {
       setProgress(null);
     }
 
-    const dataUrl = shotCount === 1 ? frames[0].toDataURL("image/jpeg", 0.92) : composeStrip(frames);
+    // Always bake the chosen frame into the saved/downloaded image.
+    const dataUrl = composeStrip(frames);
     setResult(dataUrl);
-    setIsStrip(shotCount > 1);
     saveShot({ id: crypto.randomUUID(), dataUrl, createdAt: Date.now(), filter, frame });
     toast.success(shotCount > 1 ? `${shotCount}-shot strip saved ✨` : "Saved to your gallery ✨");
   }
 
   function reset() {
     setResult(null);
-    setIsStrip(false);
   }
 
   function download() {
@@ -302,24 +312,19 @@ export function PhotoBooth() {
   }
 
   const busy = countdown !== null || progress !== null;
+  const isStrip = shotCount > 1;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       {/* Stage */}
       <div className="flex flex-col items-center">
-        <div className={`relative w-full ${isStrip && result ? "max-w-[420px]" : "max-w-[640px]"}`}>
+        <div className={`relative w-full ${isStrip && result ? "max-w-[460px]" : "max-w-[640px]"}`}>
           {result ? (
-            isStrip ? (
-              <img
-                src={result}
-                alt="Your photo strip"
-                className="w-full rounded-3xl shadow-[var(--shadow-soft)]"
-              />
-            ) : (
-              <PhotoFrame frame={frame}>
-                <img src={result} alt="Your shot" className="absolute inset-0 h-full w-full object-contain" />
-              </PhotoFrame>
-            )
+            <img
+              src={result}
+              alt="Your shot"
+              className="w-full rounded-2xl shadow-[var(--shadow-soft)]"
+            />
           ) : (
             <PhotoFrame frame={frame}>
               <video
@@ -428,6 +433,34 @@ export function PhotoBooth() {
               : shotCount <= 3
                 ? `${shotCount}-photo strip, stacked top to bottom.`
                 : `${shotCount}-photo collage in a 2-column grid.`}
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Timer</h3>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {TIMER_OPTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setTimerSeconds(s)}
+                disabled={busy}
+                className={`rounded-xl py-2.5 text-sm font-semibold transition-all ${
+                  timerSeconds === s
+                    ? "bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
+                    : "bg-white/50 hover:bg-white/80"
+                }`}
+              >
+                {s === 0 ? "Off" : `${s}s`}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {timerSeconds === 0
+              ? "Instant capture, no countdown."
+              : `${timerSeconds}-second countdown before each shot.`}
           </p>
         </div>
 
