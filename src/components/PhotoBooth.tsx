@@ -606,3 +606,70 @@ export function PhotoBooth() {
     </div>
   );
 }
+
+function PillCarousel({
+  icon,
+  title,
+  items,
+  activeId,
+  onSelect,
+  activeClass,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  items: { id: string; label: string }[];
+  activeId: string;
+  onSelect: (id: string) => void;
+  activeClass: string;
+}) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollBy = (dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
+  };
+
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {icon}
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">{title}</h3>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => scrollBy(-1)}
+            aria-label={`Previous ${title.toLowerCase()}`}
+            className="grid h-7 w-7 place-items-center rounded-full bg-white/70 text-foreground/70 transition hover:bg-white hover:scale-105"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => scrollBy(1)}
+            aria-label={`Next ${title.toLowerCase()}`}
+            className="grid h-7 w-7 place-items-center rounded-full bg-white/70 text-foreground/70 transition hover:bg-white hover:scale-105"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      <div
+        ref={trackRef}
+        className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {items.map((it) => (
+          <button
+            key={it.id}
+            onClick={() => onSelect(it.id)}
+            className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+              activeId === it.id ? activeClass : "bg-white/60 hover:bg-white/90"
+            }`}
+          >
+            {it.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
