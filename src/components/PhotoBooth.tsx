@@ -576,54 +576,28 @@ export function PhotoBooth() {
           </p>
         </div>
 
-        <div>
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Filters</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {FILTERS.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                className={`rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
-                  filter === f.id
-                    ? "bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
-                    : "bg-white/50 hover:bg-white/80"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <PillCarousel
+          icon={<Sparkles className="h-4 w-4 text-primary" />}
+          title="Filters"
+          items={FILTERS.map((f) => ({ id: f.id, label: f.label }))}
+          activeId={filter}
+          onSelect={(id) => setFilter(id as FilterId)}
+          activeClass="bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
+        />
 
-        <div>
-          <div className="mb-3 flex items-center gap-2">
-            <Camera className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Frames</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {FRAMES.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setFrame(f.id)}
-                className={`rounded-2xl px-3 py-2.5 text-sm font-medium transition-all ${
-                  frame === f.id
-                    ? "bg-foreground text-background shadow-[var(--shadow-soft)]"
-                    : "bg-white/50 hover:bg-white/80"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-          {shotCount > 1 && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              For strips, the frame color tints your photo strip background.
-            </p>
-          )}
-        </div>
+        <PillCarousel
+          icon={<Camera className="h-4 w-4 text-primary" />}
+          title="Frames"
+          items={FRAMES.map((f) => ({ id: f.id, label: f.label }))}
+          activeId={frame}
+          onSelect={(id) => setFrame(id as FrameId)}
+          activeClass="bg-foreground text-background shadow-[var(--shadow-soft)]"
+        />
+        {shotCount > 1 && (
+          <p className="-mt-3 text-xs text-muted-foreground">
+            The chosen frame styling is baked into your saved strip.
+          </p>
+        )}
 
         <p className="text-xs leading-relaxed text-muted-foreground">
           Tip: pick how many shots, hit the big button, and pose between countdowns. Strips save to your gallery as one image.
