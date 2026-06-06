@@ -576,22 +576,26 @@ export function PhotoBooth() {
           </p>
         </div>
 
-        <PillCarousel
+        <CardCarousel
           icon={<Sparkles className="h-4 w-4 text-primary" />}
           title="Filters"
           items={FILTERS.map((f) => ({ id: f.id, label: f.label }))}
           activeId={filter}
-          onSelect={(id) => setFilter(id as FilterId)}
-          activeClass="bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
+          onSelect={(id: string) => setFilter(id as FilterId)}
+          renderCard={(it, isActive) => (
+            <FilterCard id={it.id as FilterId} label={it.label} isActive={isActive} />
+          )}
         />
 
-        <PillCarousel
+        <CardCarousel
           icon={<Camera className="h-4 w-4 text-primary" />}
           title="Frames"
           items={FRAMES.map((f) => ({ id: f.id, label: f.label }))}
           activeId={frame}
-          onSelect={(id) => setFrame(id as FrameId)}
-          activeClass="bg-foreground text-background shadow-[var(--shadow-soft)]"
+          onSelect={(id: string) => setFrame(id as FrameId)}
+          renderCard={(it, isActive) => (
+            <FrameCard id={it.id as FrameId} label={it.label} isActive={isActive} />
+          )}
         />
         {shotCount > 1 && (
           <p className="-mt-3 text-xs text-muted-foreground">
