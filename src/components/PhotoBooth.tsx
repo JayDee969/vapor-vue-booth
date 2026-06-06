@@ -692,7 +692,7 @@ function CardCarousel({
             onClick={() => onSelect(it.id)}
             className={`shrink-0 snap-start transition-all ${
               activeId === it.id
-                ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
+                ? "scale-[1.02]"
                 : "opacity-80 hover:opacity-100 hover:scale-[1.02]"
             }`}
           >
