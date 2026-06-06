@@ -576,22 +576,26 @@ export function PhotoBooth() {
           </p>
         </div>
 
-        <PillCarousel
+        <CardCarousel
           icon={<Sparkles className="h-4 w-4 text-primary" />}
           title="Filters"
           items={FILTERS.map((f) => ({ id: f.id, label: f.label }))}
           activeId={filter}
-          onSelect={(id) => setFilter(id as FilterId)}
-          activeClass="bg-[image:var(--gradient-primary)] text-primary-foreground shadow-[var(--shadow-soft)]"
+          onSelect={(id: string) => setFilter(id as FilterId)}
+          renderCard={(it, isActive) => (
+            <FilterCard id={it.id as FilterId} label={it.label} isActive={isActive} />
+          )}
         />
 
-        <PillCarousel
+        <CardCarousel
           icon={<Camera className="h-4 w-4 text-primary" />}
           title="Frames"
           items={FRAMES.map((f) => ({ id: f.id, label: f.label }))}
           activeId={frame}
-          onSelect={(id) => setFrame(id as FrameId)}
-          activeClass="bg-foreground text-background shadow-[var(--shadow-soft)]"
+          onSelect={(id: string) => setFrame(id as FrameId)}
+          renderCard={(it, isActive) => (
+            <FrameCard id={it.id as FrameId} label={it.label} isActive={isActive} />
+          )}
         />
         {shotCount > 1 && (
           <p className="-mt-3 text-xs text-muted-foreground">
@@ -607,27 +611,51 @@ export function PhotoBooth() {
   );
 }
 
-function PillCarousel({
+const FILTER_SWATCH: Record<FilterId, string> = {
+  none: "linear-gradient(135deg, #f5f5f5, #e0e0e0)",
+  vintage: "linear-gradient(135deg, #d4a574, #8b6914)",
+  bw: "linear-gradient(135deg, #888888, #333333)",
+  glow: "linear-gradient(135deg, #ffd1dc, #ffb6c1)",
+  pastel: "linear-gradient(135deg, #c1e1c1, #e8d8f5)",
+  retro: "linear-gradient(135deg, #e8b84a, #c4654a)",
+  blur: "linear-gradient(135deg, #b8d4e8, #d8c0e0)",
+};
+
+const FRAME_SWATCH: Record<FrameId, { bg: string; border: string; accent: string; style?: string }> = {
+  none: { bg: "#ffffff", border: "#e5e5e5", accent: "#3a2a45" },
+  polaroid: { bg: "#ffffff", border: "#f0f0f0", accent: "#3a2a45", style: "pb-3" },
+  filmstrip: { bg: "#171717", border: "#2a2a2a", accent: "#f5f5f5" },
+  film35: { bg: "#f4ecdc", border: "#e8dcc0", accent: "#6b4a22" },
+  neon: { bg: "#0a0a0a", border: "#ff6ad5", accent: "#ff6ad5", style: "border-2 border-[#ff6ad5]" },
+  scrapbook: { bg: "#fdf6e3", border: "#e8dcc0", accent: "#7a5a3a" },
+  cute: { bg: "linear-gradient(135deg, #fbeaf2, #e8d8f5)", border: "#f0c0d8", accent: "#c4537a" },
+  modern: { bg: "#0a0a0a", border: "#2a2a2a", accent: "#f5f5f5", style: "border-2 border-[#2a2a2a]" },
+  vintage: { bg: "#efe2c4", border: "#d4c090", accent: "#6b4a22" },
+  minimalist: { bg: "#ffffff", border: "#e5e5e5", accent: "#3a2a45", style: "border-2 border-[#e5e5e5]" },
+  kawaii: { bg: "linear-gradient(135deg, #ffe4f1, #fff1c1, #d8f1ff)", border: "#f0c0d8", accent: "#c4537a" },
+};
+
+function CardCarousel({
   icon,
   title,
   items,
   activeId,
   onSelect,
-  activeClass,
+  renderCard,
 }: {
   icon: ReactNode;
   title: string;
   items: { id: string; label: string }[];
   activeId: string;
   onSelect: (id: string) => void;
-  activeClass: string;
+  renderCard: (it: { id: string; label: string }, isActive: boolean) => ReactNode;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   const scrollBy = (dir: 1 | -1) => {
     const el = trackRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
+    el.scrollBy({ left: dir * 160, behavior: "smooth" });
   };
 
   return (
@@ -656,20 +684,63 @@ function PillCarousel({
       </div>
       <div
         ref={trackRef}
-        className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((it) => (
           <button
             key={it.id}
             onClick={() => onSelect(it.id)}
-            className={`shrink-0 snap-start whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
-              activeId === it.id ? activeClass : "bg-white/60 hover:bg-white/90"
+            className={`shrink-0 snap-start transition-all ${
+              activeId === it.id
+                ? "ring-2 ring-primary ring-offset-2 scale-[1.02]"
+                : "opacity-80 hover:opacity-100 hover:scale-[1.02]"
             }`}
           >
-            {it.label}
+            {renderCard(it, activeId === it.id)}
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function FilterCard({ id, label, isActive }: { id: FilterId; label: string; isActive: boolean }) {
+  return (
+    <div className="flex flex-col items-center gap-2 w-[120px]">
+      <div
+        className="h-[90px] w-full rounded-2xl shadow-sm"
+        style={{ background: FILTER_SWATCH[id] }}
+      />
+      <span className={`text-xs font-semibold ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function FrameCard({ id, label, isActive }: { id: FrameId; label: string; isActive: boolean }) {
+  const swatch = FRAME_SWATCH[id];
+  return (
+    <div className="flex flex-col items-center gap-2 w-[120px]">
+      <div
+        className="h-[90px] w-full rounded-2xl shadow-sm flex items-center justify-center p-2"
+        style={{ background: swatch.bg, border: `2px solid ${swatch.border}` }}
+      >
+        {/* Mini photo placeholder inside frame preview */}
+        <div
+          className="w-full h-full rounded-lg flex items-center justify-center"
+          style={{
+            background: id === "none" ? "#f0f0f0" : id === "polaroid" ? "#f8f8f8" : id === "modern" || id === "filmstrip" ? "#1a1a1a" : "#ffffff",
+            border: id === "polaroid" ? "8px solid #fff" : id === "minimalist" ? "1px solid #ddd" : undefined,
+            paddingBottom: id === "polaroid" ? "16px" : undefined,
+          }}
+        >
+          <Camera className="h-5 w-5" style={{ color: swatch.accent, opacity: 0.3 }} />
+        </div>
+      </div>
+      <span className={`text-xs font-semibold ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+        {label}
+      </span>
     </div>
   );
 }
